@@ -227,52 +227,35 @@ function getServiceFacilities($first = '') {
         }
 }
 
-//(CHEMED) facility filter
-function getProviderInfo($providerID = "%", $providers_only = true, $facility = '' ) {
-    $param1 = "";
-    if ($providers_only === 'any') {
-      $param1 = " AND authorized = 1 AND active = 1 ";
+function getProviderInfo($providerID = '', $providers_only = true, $facility = '' ) {
+    $query = "select id, username, lname, fname, authorized, info, facility from users where username != '' and active = 1";
+    if (is_numeric($providerID)) {
+        $query .= " and id = " . $providerID;
+    }
+    if ($providers_only == 'any') {
+      $query .= " AND authorized = 1";
     }
     else if ($providers_only) {
-      $param1 = " AND authorized = 1 AND calendar = 1 ";
+      $query .= " AND authorized = 1 AND calendar";
     }
-
-    //--------------------------------
-    //(CHEMED) facility filter
-    $param2 = "";
+    //(CHEMED) facility filter -------
     if ($facility) {
       if ($GLOBALS['restrict_user_facility']) {
-        $param2 = " AND (facility_id = $facility 
-          OR  $facility IN
-	        (select facility_id 
-	        from users_facility
-	        where tablename = 'users'
-	        and table_id = id)
-	        )
-          ";
+        $query .= " AND (facility_id = $facility OR $facility IN
+	        (select facility_id from users_facility where tablename = 'users' and table_id = id))";
       }
       else {
-        $param2 = " AND facility_id = $facility ";
+        $query .= " AND facility_id = $facility";
       }
     }
     //--------------------------------
-
-    $command = "=";
-    if ($providerID == "%") {
-        $command = "like";
-    }
-    $query = "select distinct id, username, lname, fname, authorized, info, facility " .
-        "from users where username != '' and active = 1 and id $command '" .
-        mysql_real_escape_string($providerID) . "' " . $param1 . $param2;
-    // sort by last name -- JRM June 2008
-    $query .= " ORDER BY lname, fname ";
+    $query .= " ORDER BY calendar, lname, fname;";
     $rez = sqlStatement($query);
     for($iter=0; $row=sqlFetchArray($rez); $iter++)
         $returnval[$iter]=$row;
 
     //if only one result returned take the key/value pairs in array [0] and merge them down the the base array so that $resultval[0]['key'] is also
-    //accessible from $resultval['key']
-
+    //accessible from $resultval['key']    -- Say what???
     if($iter==1) {
         $akeys = array_keys($returnval[0]);
         foreach($akeys as $key) {

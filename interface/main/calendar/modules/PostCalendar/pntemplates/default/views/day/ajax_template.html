@@ -320,7 +320,7 @@ if (count($facilities) > 1) {
  // EOS FF
  // ==============================
  echo "</div>";
- echo "   <select multiple size='5' name='pc_username[]' id='pc_username' class='view2'>\n";
+ echo "   <select multiple size='10' name='pc_username[]' id='pc_username' class='view2'>\n";
  echo "    <option value='__PC_ALL__'>"  .xl ("All Users"). "</option>\n";
  foreach ($provinfo as $doc) {
     $username = $doc['username'];
@@ -386,6 +386,10 @@ foreach ($times as $slottime) {
 }
 echo "</table></div></td>";
 
+//pw start ********
+$pname_max = 136 / count($providers); // tune for resolution?
+If ($pname_max < 13) { $pname_max = 13; }  // tune for resolution?
+//pw end ********
 
 // This loops once for each provider to be displayed.
 //
@@ -403,9 +407,20 @@ foreach ($providers as $provider) {
     // having a 'title' for the TD makes the date appear by the mouse pointer
     // this is nice when all you see are times on the left side and no head
     // row with the dates or day-of-week (DOW)
-    echo "<td class='schedule' title='".htmlspecialchars($provider["fname"],ENT_QUOTES)." ".htmlspecialchars($provider["lname"],ENT_QUOTES)."' date='".date("Ymd",$caldate )."' provider='$providerid'>";
+    //pw start ********
+    $pname_display = htmlspecialchars($provider['fname'],ENT_QUOTES)." ".htmlspecialchars($provider['lname'],ENT_QUOTES);
+    If (strlen($pname_display) > $pname_max) { // if full name exceeds $pname_max, collapse first name to first initial
+        $pname_display = htmlspecialchars(substr($provider['fname'], 0, 1),ENT_QUOTES)." ".htmlspecialchars($provider['lname'],ENT_QUOTES);
+    	  If (strlen($pname_display) > $pname_max) { // if full name still exceeds $pname_max, remove first initial
+        	$pname_display = htmlspecialchars($provider['lname'],ENT_QUOTES);
+	  }
+    }
+    $pname_len = ($pname_max - strlen($pname_display)) / 2;
+    $pname_display = substr("          ", 0, $pname_len).$pname_display.substr("          ", 0, $pname_len + .5);
+    echo "<td class='schedule' title='".$pname_display."' date='".date("Ymd",$caldate )."' provider='$providerid'>";
     echo "<div class='providerheader'>";
-    echo htmlspecialchars($provider['fname'],ENT_QUOTES)." ".htmlspecialchars($provider['lname'],ENT_QUOTES)."</div>";
+    echo $pname_display."</div>";
+    //pw end ********
     echo "<div class='calendar_day'>";
 
     // For each event...

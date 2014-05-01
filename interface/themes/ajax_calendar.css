@@ -215,12 +215,14 @@ div.tiny { width:1px; height:1px; font-size:1px; }
 
 /* for the header row with provider names */
 .providerheader {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 0.7em; 
     text-align: center;
     background-color: #EDEAFF;
     width: 100%; 
     overflow:hidden; 
     border-bottom: 1px solid lightgrey;
-    white-space: nowrap;
+    white-space: pre;
 }
 
 /* for the DIV inside each TD, this DIV contains any events for a single day */
